@@ -8,62 +8,74 @@ public class RisolviQuadrato {
 	private int N2 ; // numero di caselle (N^2)
 	private int magica ; // costante magica
 	
-	private List<List<Integer>> soluzioni;
+	private List<List<Integer>> soluzioni; //una lista di liste
 	
-	public RisolviQuadrato(int N) {
-		this.N = N ;
-		this.N2 = N*N ;
-		this.magica = N*(N2+1)/2 ;
+	public RisolviQuadrato(int lato) {
+		this.N=lato; 
+		this.N2=lato*lato; 
+		this.magica= lato*(N2+1)/2; //formula per quanto devono fare le somme
+		
 	}
 	
-	// Calcola tutti i quadrati magici
+	//Calcola tutti i quadrati magici
 	public List<List<Integer>> quadrati() {
-		List<Integer> parziale = new ArrayList<>() ;
-		int livello = 0 ;
+		// si occupa dle livello zero
+		List<Integer> parziale= new ArrayList<>(); 
+		int livello= 0; 
 		
-		this.soluzioni = new ArrayList<List<Integer>>() ;
 		
-		cerca(parziale, livello) ;
+		this.soluzioni= new ArrayList<List<Integer>>(); 
+		ricorsiva(parziale, livello); 
 		
-		return this.soluzioni ;
+		return soluzioni; 
 	}
 	
-	// procedura ricorsiva (privata)
-	private void cerca(List<Integer> parziale, int livello) {
+	//procedura ricorsiva (privata)
+	private void ricorsiva(List<Integer> parziale, int livello) {
 		
-		if(livello==N2) {
-			// caso terminale
-			if(controlla(parziale)) {
-				// è magico!!
-				System.out.println(parziale) ;
-				this.soluzioni.add(new ArrayList<>(parziale)) ;
+		//caso terminale
+		if (livello==N2) {
+			// ho un quadrato completo ma non e' detto che sia magico
+			if (controlla(parziale)) {
+				//ok e' magico
+				System.out.println(parziale); 
+				this.soluzioni.add(new ArrayList<>(parziale)); // nuovo perche' voglio il valore non il riferimento all'oggetto
 			}
-			return ;
+			// magico o no devo tornare perche' e' completo
+			return; 
 		}
-		
-		// controlli intermedi, quando livello è multiplo di N (righe complete)
+		// controllo intermedio per livello multiplo di N ovvero alcune righe sono complete
+		// perche' se la somma di quella riga e' sbagliata e' inutile andare avanti
 		if(livello%N==0 && livello!=0) {
-			if(!controllaRiga(parziale, livello/N-1))
-				return ; // potatura (pruning) dell'albero di ricerca
+			if (!controllaRiga(parziale, livello/N-1))
+				return; //potatura dell'albero di ricerca (pruning)
 		}
 		
-		// caso intermedio
-		for(int valore=1; valore<=N2; valore++) {
-			if(!parziale.contains(valore)) {
-				// prova 'valore'
-				parziale.add(valore) ;
-				cerca(parziale, livello+1);
-				parziale.remove(parziale.size()-1) ;
+		
+		
+		//caso generale 
+		for (int valore =1; valore<=N2; valore++) {
+			if (!parziale.contains(valore)) {
+				// non e' ancora stato usato quindi lo posso provare 
+				parziale.add(valore); 
+				ricorsiva(parziale, livello+1); 
+				
+				// backtracking
+				parziale.remove(parziale.size()-1); //tolgo l'ultimo elemento aggiunto
+				
 			}
 		}
-	}
 		
+		
+		
+	}
 	/**
 	 * Verifica se una soluzione rispetta tutte le somme
 	 * @param parziale
 	 * @return
 	 */
 	private boolean controlla(List<Integer> parziale) {
+		//controllo che sia completo altriimenti tanto vale 
 		if(parziale.size()!=this.N*this.N)
 			throw new IllegalArgumentException("Numero di elementi insufficiente") ;
 		
@@ -106,6 +118,7 @@ public class RisolviQuadrato {
 		return true ;
 	}
 	
+	//controlla la somma della sola riga 
 	private boolean controllaRiga(List<Integer> parziale, int riga) {
 		int somma=0;
 		for(int col=0; col<N; col++)
